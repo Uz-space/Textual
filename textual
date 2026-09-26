@@ -1,0 +1,101 @@
+from textual.app import App, ComposeResult
+from textual.containers import Container, Vertical
+from textual.widgets import Button, Input, Static, Label, Rule
+
+class ResponsiveLoginApp(App):
+    """Har qanday zoom va ekran o'lchamiga avtomat moslashadigan UI"""
+
+    CSS = """
+    Screen {
+        align: center top;          /* Ramkani tepaga va gorizontal markazga moslaymiz */
+        background: #121212;
+    }
+    #main-container {
+        width: 100%;                /* Chap va o'ng tomonni 0 qilish uchun 100% kenglik */
+        height: auto;
+        border: round white;        /* Burchaklar silliq yumaloq */
+        background: #1a1a1a;
+        layout: vertical;
+        padding: 1 0;               /* Konteynerning o'zidan yon bo'shliqlarni olib tashlaymiz */
+        margin-top: 0;              /* Tepaga mutloq yopishtirish */
+    }
+
+    /* Sarlavha va chiziq joylashgan yuqori qism */
+    #header-section {
+        width: 100%;
+        height: auto;
+    }
+    #title-text {
+        text-align: center;
+        text-style: bold;
+        color: white;
+        margin-bottom: 1;
+        width: 100%;
+    }
+    Rule {
+        color: #555555;             /* Chiziq rangi */
+        margin: 0;                  /* Hech qanday chekinishlarsiz to'liq ulanadi */
+    }
+
+    /* Inputlar va tugma joylashgan pastki qism */
+    #form-section {
+        width: 100%;
+        height: auto;
+        padding: 0 4;               /* Forma elementlari yonidan chiroyli masofa */
+    }
+    Label {
+        text-style: bold;
+        color: #cccccc;
+        margin-top: 1;
+        text-align: center;         /* Label yozuvlarini o'rtaga oladi */
+        width: 100%;
+    }
+    Input {
+        width: 100%;                /* Inputlar ramkani to'liq to'ldiradi */
+        margin-bottom: 1;
+        border: round #555555;
+    }
+    Input:focus {
+        border: round #00ff00;
+    }
+    #add-btn {
+        width: 100%;                /* Tugma ham 100% kenglikda ramka bilan birga o'rtada turadi */
+        margin-top: 1;
+        margin-bottom: 1;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        with Container(id="main-container"):
+            # Yuqori qism (Sarlavha va chekkaga to'liq ulanadigan chiziq)
+            with Vertical(id="header-section"):
+                yield Static("alphauzs", id="title-text")  # Kichik harflar bilan o'zgartirildi
+                yield Rule()
+
+            # Pastki qism (Yonlarida bo'shliq bo'lgan formalar)
+            with Vertical(id="form-section"):
+                yield Label("Email Address")
+                yield Input(placeholder="example@mail.com", id="email-input")
+
+                yield Label("Password")
+                yield Input(placeholder="••••••••", password=True, id="password-input")
+
+                yield Button("Add Account", variant="success", id="add-btn")
+
+    def on_mount(self) -> None:
+        """Dastur ochilishi bilan birinchi inputga fokus berish"""
+        self.query_one("#email-input").focus()
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "add-btn":
+            email = self.query_one("#email-input").value
+            password = self.query_one("#password-input").value
+
+            if email and password:
+                self.notify(f"Account {email} qo'shildi!", title="Muvaffaqiyatli")
+            else:
+                self.notify("Barcha maydonlarni to'ldiring!", title="Xatolik", variant="warning")
+
+if __name__ == "__main__":
+    app = ResponsiveLoginApp()
+    app.run()
